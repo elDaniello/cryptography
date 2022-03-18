@@ -57,12 +57,6 @@ def hash_int(input):
     return hash((input).to_bytes(8,byteorder="big"))
 
 
-#print(hash(b'\x01\x02\x03'))
-#rint(hash_str("abd"))
-#print(hash_int(123))
-
-#print(hash("axd"))
-
 
 def test_collision():
     BYTES_TO_TEST = 3
@@ -77,6 +71,8 @@ def test_collision():
     print((collision_values))        
 
 (test_collision())
+
+
 
 print(hash_int(128), hash_int(127), hash_int(255), hash_int(254))
             
