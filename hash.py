@@ -2,6 +2,8 @@ input = "abc"
 import random
 import math
 
+N = 8*1
+
 def isPrime(a):
     for i in range(2,math.ceil(math.sqrt(a))+1):
         if a % i == 0: return False
@@ -62,18 +64,34 @@ def test_collision():
     BYTES_TO_TEST = 3
     collision_values = set()
     s = set()
-    for i in range(2**(8*1)):
+    for i in range(2**(N)):
         if hash_int(i) in s:
             collision_values.add(i)
         else:
             s.add(hash_int(i))
 
-    print((collision_values))        
+    print((collision_values))  
 
-(test_collision())
+# https://www.geeksforgeeks.org/birthday-attack-in-cryptography/
+def test_birthday():
+    collision_values = set()
+    s = set()
+    for i in range(2**(N//2)):
+        t = random.randint(0, 2**N)
+        # print(t)
+        if hash_int(t) in s:
+            collision_values.add(t)
+        else:
+            s.add(hash_int(t))
+
+    print(collision_values)     #{30}, {240}, {150}, {95}, {102}
+
+
+# (test_collision())
+print(test_birthday())
 
 
 
-print(hash_int(128), hash_int(127), hash_int(255), hash_int(254))
+# print(hash_int(128), hash_int(127), hash_int(255), hash_int(254))
             
     
