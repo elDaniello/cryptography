@@ -47,16 +47,42 @@ def hash(input):
     prime = generate_prime(1000, len(input))
     for char, p in zip(input, prime):
         s = s + (char) * p 
-    return s % 1000
+    return s % 2**16
 
 
 def hash_str(input):
-    return hash(bytes(input, 'utf-8'))
+    return hash(bytes(input, 'ascii'))
+
+def how_many_bytes(num: int):
+    if num <= 1:
+        return 1
+    # 0-255 -> 1
+    # 256-65535 -> 2 ...
+    try:
+        return (math.ceil(math.log2(num-1))//8)+1
+    except:
+        print(num)
+        raise ValueError()
+
 
 def hash_int(input):
-    return hash((input).to_bytes(8,byteorder="big"))
+    return hash((input).to_bytes(how_many_bytes(input),byteorder="big"))
 
 
+def xor_bytes(a: bytes, b: bytes):
+    return bytes(_a ^ _b for _a, _b in zip(a, b))
+
+def get_bit(num: int, byte_no: int):
+    return 1 if num & (1 << byte_no) else 0 
+
+def get_bits(num: int):
+    return [get_bit(num, i) for i in reversed(range(8))]
+
+def count_ones(b: bytes):
+    count = 0
+    for byte in b:
+        count += sum(get_bits(byte))
+    return count
 
 def test_collision():
     BYTES_TO_TEST = 3
@@ -70,10 +96,38 @@ def test_collision():
 
     print((collision_values))        
 
-(test_collision())
+
+def test_SAC():
+    input_size = 2
+    input_bits = input_size * 8
+    alpha = [1<<i for i in range(input_bits)]
+    output_bits_count = 16
+    output_bytes_count = 2
+
+    # 1, 2, 4, ... 128
+    # f(x) XOR f(x XOR alpha)
+    ones_count = 0
+    bits_checked = 0
+    # for every input with given lenght
+    for arg in range(2**input_bits):
+        # for every bit shifted
+        for delta_vector in alpha:
+ 
+            # for every output bit compare it with hash with one byte flipped at input
+            output_bits, shifted_output_bits = hash_int(arg).to_bytes(output_bytes_count, byteorder='big'), hash_int(arg ^ delta_vector).to_bytes(output_bytes_count, byteorder='big')
+            output_diff = xor_bytes(output_bits, shifted_output_bits)
+            #print(output_diff)
+            ones_count += count_ones(output_diff)
+            bits_checked += output_bits_count
+
+    return(ones_count/bits_checked)
+    
 
 
+print(test_SAC())
+#print(hash_int(4276545), hash_str("AAA"))
+#print(hash_int(16705), hash_str("AA"))
+#print(hash_int(65), hash_str("A"))
 
-print(hash_int(128), hash_int(127), hash_int(255), hash_int(254))
-            
+
     
