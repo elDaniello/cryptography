@@ -1,11 +1,10 @@
-input = "abc"
+# input = "abc"
 import random
 import math
 from sys import byteorder
 
 #liczba bitów na których zapisujemy
 N = 8*4
-
 
 def isPrime(a):
     for i in range(2,math.ceil(math.sqrt(a))+1):
@@ -72,9 +71,9 @@ def hash(input):
     prime = generate_prime(1000, len(input))
     # print("len: ", len(input), prime)
     for char, p in zip(input, prime):
-        s = s + ((char) * p ** 3) % (5 ** p)    #lepiej, ale still nie do końca
+        s = s + ((char) * p ** 3) % (5 ** p) % PRIME   #lepiej, ale still nie do końca
     # print("s: ", s)
-    return s % PRIME
+    return s
 
 def test_collision():
     BYTES_TO_TEST = 3
