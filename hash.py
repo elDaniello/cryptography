@@ -1,5 +1,9 @@
 input = "abc"
 import math
+import random
+import multiprocessing
+
+N=32
 
 def isPrime(a):
     for i in range(2,math.ceil(math.sqrt(a))+1):
@@ -40,13 +44,16 @@ def calc_lower_bound(input):
 #"1234123"-> 01011010110
 #12332133 -> 0 - 1000000
 
+PRIME = generate_prime(2**32, 1)[0]
+
+print(PRIME)
 #print(calc_lower_bound("abcsf"))
 def hash(input):
     s = 0
     prime = generate_prime(1000, len(input))
     for char, p in zip(input, prime):
-        s = s + (char) * p 
-    return s % 2**16
+        s += ((char) * pow(p,3,pow(5,p, 1<<N)) % PRIME) 
+    return s % (1<<N)
 
 
 def hash_str(input):
@@ -87,7 +94,7 @@ def test_collision():
     BYTES_TO_TEST = 3
     collision_values = set()
     s = set()
-    for i in range(2**(8*1)):
+    for i in range(2**(N)):
         if hash_int(i) in s:
             collision_values.add(i)
         else:
@@ -100,8 +107,8 @@ def test_SAC():
     input_size = 2
     input_bits = input_size * 8
     alpha = [1<<i for i in range(input_bits)]
-    output_bits_count = 16
-    output_bytes_count = 2
+    output_bits_count = N
+    output_bytes_count = N//8
 
     # 1, 2, 4, ... 128
     # f(x) XOR f(x XOR alpha)
@@ -109,18 +116,67 @@ def test_SAC():
     bits_checked = 0
     # for every input with given lenght
     for arg in range(2**input_bits):
-        # for every bit shifted
+        # for every bit 
         for delta_vector in alpha:
  
             # for every output bit compare it with hash with one byte flipped at input
             output_bits, shifted_output_bits = hash_int(arg).to_bytes(output_bytes_count, byteorder='big'), hash_int(arg ^ delta_vector).to_bytes(output_bytes_count, byteorder='big')
             output_diff = xor_bytes(output_bits, shifted_output_bits)
-  
+            #print(output_diff)
             ones_count += count_ones(output_diff)
             bits_checked += output_bits_count
 
     return(ones_count/bits_checked)
+
+# https://www.geeksforgeeks.org/birthday-attack-in-cryptography/
+print("dupa")
+from alive_progress import alive_bar
+def test_birthday_int():
+    collision_values = set()
+    s = set()
+    randed = set()
+    with alive_bar(2**(N//2)) as bar:
+        for i in range(2**(N//2)):
+            t = random.randint(0, 2**N)
+            randed.add(t)
+            # print("i: ", i)
+            if hash_int(t) in s:
+                # print("i: ", i)
+                collision_values.add(t)
+            else:
+                s.add(hash_int(t))
+            bar()
+
+    print(len(randed))
+    print("collision: ", len(collision_values))
+    # print(collision_values)     #{30}, {240}, {150}, {95}, {102}
+random.seed(0)
+def test_rho():
+    outputs = []
+    msg = random.randint(0, 2**N)
+    print("msg:", msg)
+    collision = False
+    while(not collision):
+        hash_msg = hash_int(msg)
+        if hash_msg not in outputs:
+            outputs.append(hash_msg)
+        else:
+            collision = True
+        msg = hash_msg
     
+    index = outputs.index(hash_msg) - 1
+    collision_msg = outputs[index]
+    print("colision messages:", collision_msg, outputs[-1])
+    print("collision after ", len(outputs), "cycles")
+
+test_rho()
+
+def generating_testing_values():
+    pass
+
+# (test_collision())
+test_birthday_int()
+# test_values ={'aaa', 'aab', 'aac', 'aad', 'aae', 'aaf', 'aag', 'aah'}
 
 
 print(test_SAC())
