@@ -1,5 +1,4 @@
 input = "abc"
-import random
 import math
 
 def isPrime(a):
@@ -116,7 +115,7 @@ def test_SAC():
             # for every output bit compare it with hash with one byte flipped at input
             output_bits, shifted_output_bits = hash_int(arg).to_bytes(output_bytes_count, byteorder='big'), hash_int(arg ^ delta_vector).to_bytes(output_bytes_count, byteorder='big')
             output_diff = xor_bytes(output_bits, shifted_output_bits)
-            #print(output_diff)
+  
             ones_count += count_ones(output_diff)
             bits_checked += output_bits_count
 
@@ -125,9 +124,6 @@ def test_SAC():
 
 
 print(test_SAC())
-#print(hash_int(4276545), hash_str("AAA"))
-#print(hash_int(16705), hash_str("AA"))
-#print(hash_int(65), hash_str("A"))
 
 
     
